@@ -2,17 +2,18 @@ import ants, time, pygame, random
 
 
 def setup():				#Setup all our lists and establish two ant colonies (RED vs BLU)
-        global colonies, trails, foods, text, debug
+        global colonies, trails, foods, text, debug, showtrail
 	colonies = []
         trails = []
 	foods = []
         text = []
-        colonies.append(ants.Colony([0,0,150],50, 150, 150, WIDTH, HEIGHT, 1500))
-        colonies.append(ants.Colony([150,0,0],50, 650, 650, WIDTH, HEIGHT, 1500))
+        colonies.append(ants.Colony([0,0,150],10, 150, 150, WIDTH, HEIGHT, 1500))
+        colonies.append(ants.Colony([150,0,0],10, 650, 650, WIDTH, HEIGHT, 1500))
 	debug=0
+	showtrail=0
 
 def doinput():				#Check for input ESC for exit d for debug mode.
-        global debug
+        global debug, showtrail
         for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                         keys[event.key] = True
@@ -23,16 +24,20 @@ def doinput():				#Check for input ESC for exit d for debug mode.
                 if keys[pygame.K_d]:
                         debug+=1
 	        if (debug>1): debug=0
+                if keys[pygame.K_t]:
+                        showtrail+=1
+	        if (showtrail>1): showtrail=0
                         
 def update():				#Update all our ants, trails, and foods.
-        global colonies, trails, foods, text, debug
+        global colonies, trails, foods, text, debug, showtrail
         
         MainSurf.fill([157,107,64])	#blank our background with a pleasant brown.
 
         if len(trails) > 0:
                 for pheromone in trails:		#If there are any trails we need to degrade them over time
                         pheromone.update()
-                        pheromone.draw(MainSurf)
+			if (showtrail==1):
+                        	pheromone.draw(MainSurf)
                         if pheromone.strength < 0.05:	#Trails that grow weak should be removed.
                                 trails.remove(pheromone)
 
@@ -52,12 +57,13 @@ def update():				#Update all our ants, trails, and foods.
 
         for colony in colonies:		#for each colony we need to go through and update and draw the ants.
                 colony.draw(MainSurf)
+		text.append(ants.Text([150,150,150], 10, (colony.x-5, colony.y+30), str(len(colony))))
                 for ant in colony:
-                        ant.update(trails,foods)
+                        ant.update(trails,foods,colonies)
                         ant.draw(MainSurf)
 	        
 	        	if debug==1:	#if debug mode is on draw our ants heading and position.
-				text.append(ants.Text([0,200,0], 10, (ant.x, ant.y), str((int(ant.x),int(ant.y),int(ant.r)))))
+				text.append(ants.Text([150,150,150], 10, (ant.x, ant.y), str((int(ant.x),int(ant.y),int(ant.r)))))
 		
 	
         for t in text:			#draw any text we have.
@@ -77,7 +83,7 @@ if __name__ == "__main__":
         HEIGHT=800
         MainSurf = pygame.display.set_mode([WIDTH, HEIGHT])
 
-        keys = {pygame.K_ESCAPE : False, pygame.K_d : False} 	#Declare keys we will use
+        keys = {pygame.K_ESCAPE : False, pygame.K_d : False, pygame.K_t : False} #Declare keys we will use
         
         setup()					#run our init function
 	

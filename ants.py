@@ -107,23 +107,36 @@ class Ant:
                 food.size -= 1
                 self.has_food = True
         
-    def recall(self, trails, trail=0.08):
+    def recall(self, trails, trail=0.08, accuracy=0.5):
         
         if self.has_food:
-            self.heading(self.colony)
+	    if (random.random() > accuracy):
+            	self.heading(self.colony)
             if random.random() < trail:
                 trails.append(Pheromone(self.x, self.y, (self.r-180)))
         
         if self.near(self.colony) and self.has_food:	#Drop food and start wandering again
             self.has_food = False
             self.colony.food += 1
+	    self.colony.append(Ant(self.colony, self.colony.x, self.colony.y))
+
+    def fight(self, colonies):
+        for colony in colonies:
+	    if colony!=self.colony:
+		for ant in colony:	
+	            if self.near(ant): 
+                	if (random.random() > .5):
+                		self.colony.remove(self)
+			else:
+				colony.remove(ant)
     
-    def update(self, trails, foodsource, speed=3):
+    def update(self, trails, foodsource, colonies):
         
         self.follow(trails) 		#follow nearby trails to food.
         self.harvest(foodsource)	#harvest nearby food source
         self.recall(trails)		#bring food directly to colony
         self.wander()			#some random wandering is more efficient
+	#self.fight(colonies)		#FIGHT
 
         self.y += self.s*sin(radians(self.r))	#Move!
         self.x += self.s*cos(radians(self.r)) 
