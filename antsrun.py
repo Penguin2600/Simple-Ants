@@ -56,8 +56,8 @@ def update():				#Update all our ants, trails, and foods.
                         ant.update(trails,foods)
                         ant.draw(MainSurf)
 	        
-	        if debug==1:		#if debug mode is on draw our ants heading and position.
-			text.append(ants.Text([0,200,0], 10, (ant.x, ant.y), str((int(ant.x),int(ant.y),int(ant.r)))))
+	        	if debug==1:	#if debug mode is on draw our ants heading and position.
+				text.append(ants.Text([0,200,0], 10, (ant.x, ant.y), str((int(ant.x),int(ant.y),int(ant.r)))))
 		
 	
         for t in text:			#draw any text we have.
