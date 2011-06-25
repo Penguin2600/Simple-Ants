@@ -17,6 +17,10 @@ class Colony(list):
         self.w = w      #Screen Width
         self.h = h      #Screen Height
         self.r = r      #Max wander radius
+
+        self.image = pygame.image.load("hill.png")
+        self.rect = self.image.get_rect()
+        self.rect.center=(self.x,self.y)
     
     def nstep(self):    #keep track of steps
         self.step+=1
@@ -24,8 +28,9 @@ class Colony(list):
         return self.step
 
     def draw(self, surface):    #Draw our "Hill"
-        pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), 12)
-        pygame.draw.circle(surface, [0,0,0], (int(self.x), int(self.y)), 4)
+        surface.blit(self.image,self.rect.topleft)
+        #pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), 12)
+        #pygame.draw.circle(surface, [0,0,0], (int(self.x), int(self.y)), 4)
 
 class Food:
     def __init__(self, x, y, size):
@@ -34,7 +39,7 @@ class Food:
         self.size = size    #Size of food blob
 
     def draw(self, surface):    #Draw our foods
-        pygame.draw.circle(surface, [0,150,0], (int(self.x), int(self.y)), int(self.size))
+        pygame.draw.circle(surface, [0,0,150], (int(self.x), int(self.y)), int(self.size))
 
 class Pheromone:
     
@@ -59,7 +64,7 @@ class Ant:
     def __init__(self, colony, x, y, step):
     
         self.colony = colony
-        
+
         self.x = x                              #X position
         self.y = y                              #Y position
         self.r = int(random.random()*359)       #Initial heading
@@ -67,6 +72,9 @@ class Ant:
         self.has_food = False                   #Do I have food?
         self.wandering = 0                      #How far have I wandered
         self.step = step                        #Do heavy lifting only so often
+
+        self.black = pygame.image.load("blackant.png")
+        self.red = pygame.image.load("redant.png")
     
     def near(self, obj, radius=10):     #Distance function
 
@@ -166,10 +174,16 @@ class Ant:
         if (self.step > self.colony.maxstep): self.step=0
     
     def draw(self, surface):    #Draw our ant
-        y=int(self.y+2*sin(radians(self.r)))
-        x=int(self.x+2*cos(radians(self.r)))
-        
-        pygame.draw.line(surface, self.colony.color, (int(self.x), int(self.y)),(x,y), 2)
+        if self.colony.color[0]:
+            self.image=pygame.transform.rotate(self.red, -self.r)
+        else:
+            self.image=pygame.transform.rotate(self.black, -self.r)
+        self.rect = self.image.get_rect()
+        self.rect.center=(self.x,self.y)
+        #y=int(self.y+2*sin(radians(self.r)))
+        #x=int(self.x+2*cos(radians(self.r)))
+        surface.blit(self.image,self.rect.topleft)
+        #pygame.draw.line(surface, self.colony.color, (int(self.x), int(self.y)),(x,y), 2)
         
 class Text:
 

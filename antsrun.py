@@ -31,7 +31,7 @@ def doinput():            #Check for input ESC for exit d for debug mode.
 def update():              #Update all our ants, trails, and foods.
     global colonies, trails, foods, text, debug, showtrail
 
-    MainSurf.fill([157,107,64])     #blank our background with a pleasant brown.
+    MainSurf.fill([64,157,80])     #blank our background with a pleasant brown.
 
     if len(trails) > 0:
         for pheromone in trails:        #If there are any trails we need to degrade them over time
