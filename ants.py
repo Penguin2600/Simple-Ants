@@ -1,17 +1,18 @@
-import random, pygame, os, sys
+import random, pygame, os, sys, audio
 
 from math import *
 
 PATH=str(os.path.abspath(os.path.dirname(sys.argv[0])))
 
-class Colony(list):
+class Colony(pygame.sprite.Group):
     def __init__(self,c, n, m, x, y, w, h, r):
+        pygame.sprite.Group.__init__(self) 
         self.food = 10
         self.color=c
         self.step=0
         self.maxstep=7
         for i in range(n):
-            self.append(Ant(self, x, y, self.nstep()))
+            self.add(Ant(self, x, y, self.nstep()))
             self.step+=1
         
         self.x = x      #X position
@@ -21,7 +22,7 @@ class Colony(list):
         self.r = r      #Max wander radius
         self.maxants = m    #Max ants
 
-        self.image = pygame.image.load(PATH+"/resources/hill.png")
+        self.image = pygame.image.load(PATH+"/resources/hill.png").convert()
         self.rect = self.image.get_rect()
         self.rect.center=(self.x,self.y)
     
@@ -30,10 +31,8 @@ class Colony(list):
         if (self.step > self.maxstep): self.step=0
         return self.step
 
-    def draw(self, surface):    #Draw our "Hill"
-        surface.blit(self.image,self.rect.topleft)
-        #pygame.draw.circle(surface, self.color, (int(self.x), int(self.y)), 12)
-        #pygame.draw.circle(surface, [0,0,0], (int(self.x), int(self.y)), 4)
+    def drawhill(self, surface):    #Draw our "Hill"
+       surface.blit(self.image,self.rect.topleft)
 
 class Food:
     def __init__(self, x, y, size):
@@ -50,7 +49,7 @@ class Pheromone:
         self.x = x        #X position
         self.y = y        #Y position
         self.r = r        #Heading
-        self.strength = 1.0     #Streangth of signal
+        self.strength = 1.0     #Strength of signal
     
     def update(self, d=0.004):  #Degrade over time
         self.strength -= d
@@ -62,10 +61,9 @@ class Pheromone:
         pygame.draw.circle(surface, color , (int(self.x),int(self.y)), 2)
         pygame.draw.line(surface, color, (int(self.x), int(self.y)),(x,y), 1)
 
-class Ant:
-
+class Ant(pygame.sprite.Sprite):
     def __init__(self, colony, x, y, step):
-    
+        pygame.sprite.Sprite.__init__(self) 
         self.colony = colony
 
         self.x = x                              #X position
@@ -76,13 +74,16 @@ class Ant:
         self.wandering = 0                      #How far have I wandered
         self.step = step                        #Do heavy lifting only so often
 
-        self.black = pygame.image.load(PATH+"/resources/blackant.png")
-        self.red = pygame.image.load(PATH+"/resources/redant.png")
-
-        self.sndgetfood=pygame.mixer.Sound(PATH+'/resources/beep1.wav')
-        self.snddropfood=pygame.mixer.Sound(PATH+'/resources/beep2.wav')
-        self.sndfight=pygame.mixer.Sound(PATH+'/resources/beep3.wav')
-    
+        if self.colony.color=="red":            #what color am I?
+            self.original=pygame.image.load(PATH+"/resources/redant.png").convert()
+        else:
+            self.original=pygame.image.load(PATH+"/resources/blackant.png").convert()
+            
+        self.image=self.original
+        self.rect=self.original.get_rect()
+        
+        self.sounds=audio.AntSamples()
+        
     def near(self, obj, radius=10):     #Distance function
 
         d = (((obj.x-self.x)**2 ) + ((obj.y-self.y)**2))**0.5
@@ -129,7 +130,7 @@ class Ant:
             if self.near(food, radius=food.size+2) and self.has_food == False: 
                 food.size -= 1
                 self.has_food = True
-                self.sndgetfood.play()
+                self.sounds.playsound('get')
     
     def recall(self, trails):
     
@@ -150,16 +151,16 @@ class Ant:
                     self.has_food = False
                     self.r+=180
                     self.colony.food += 1
-                    self.snddropfood.play()
-                    if (len(self.colony) < self.colony.maxants):
-                        self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
+                    self.sounds.playsound('drop')
+                    #if (len(self.colony) < self.colony.maxants):
+                        #self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
 
     def fight(self, colonies):
         for colony in colonies:
             if colony!=self.colony:
                 for ant in colony:      
                     if self.near(ant):
-                        self.sndfight.play()
+                        self.sounds.playsound('fight')
                         if (random.random() > .5):
                             self.colony.remove(self)
                         else:
@@ -176,25 +177,30 @@ class Ant:
             self.recall(trails)     #bring food directly to colony
         
         self.wander()               #some random wandering is more efficient
-        self.fight(colonies)        #FIGHT
+
+        #if (self.step)==5: 
+            #self.fight(colonies)        #FIGHT
 
         self.y += self.s*sin(radians(self.r))   #Move!
         self.x += self.s*cos(radians(self.r)) 
 
         self.step+=1
         if (self.step > self.colony.maxstep): self.step=0
-    
-    def draw(self, surface):    #Draw our ant
-        if self.colony.color[0]:
-            self.image=pygame.transform.rotate(self.red, -self.r)
-        else:
-            self.image=pygame.transform.rotate(self.black, -self.r)
+
+        # Handle pre-draw transforms
+
+        self.image=pygame.transform.rotate(self.original, -self.r)
+        self.image.set_colorkey([255,255,255])
         self.rect = self.image.get_rect()
         self.rect.center=(self.x,self.y)
-        #y=int(self.y+2*sin(radians(self.r)))
-        #x=int(self.x+2*cos(radians(self.r)))
-        surface.blit(self.image,self.rect.topleft)
-        #pygame.draw.line(surface, self.colony.color, (int(self.x), int(self.y)),(x,y), 2)
+    
+##    def draw(self, surface):    #Draw our ant
+##        self.image=pygame.transform.rotate(self.original, -self.r)
+##        self.image.set_colorkey([255,255,255])
+##        self.rect = self.image.get_rect()
+##        self.rect.center=(self.x,self.y)
+##        surface.blit(self.image,self.rect.topleft)
+
         
 class Text:
 
