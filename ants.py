@@ -78,6 +78,10 @@ class Ant:
 
         self.black = pygame.image.load(PATH+"/resources/blackant.png")
         self.red = pygame.image.load(PATH+"/resources/redant.png")
+
+        self.sndgetfood=pygame.mixer.Sound(PATH+'/resources/beep1.wav')
+        self.snddropfood=pygame.mixer.Sound(PATH+'/resources/beep2.wav')
+        self.sndfight=pygame.mixer.Sound(PATH+'/resources/beep3.wav')
     
     def near(self, obj, radius=10):     #Distance function
 
@@ -125,6 +129,7 @@ class Ant:
             if self.near(food, radius=food.size+2) and self.has_food == False: 
                 food.size -= 1
                 self.has_food = True
+                self.sndgetfood.play()
     
     def recall(self, trails):
     
@@ -145,6 +150,7 @@ class Ant:
                     self.has_food = False
                     self.r+=180
                     self.colony.food += 1
+                    self.snddropfood.play()
                     if (len(self.colony) < self.colony.maxants):
                         self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
 
@@ -152,7 +158,8 @@ class Ant:
         for colony in colonies:
             if colony!=self.colony:
                 for ant in colony:      
-                    if self.near(ant): 
+                    if self.near(ant):
+                        self.sndfight.play()
                         if (random.random() > .5):
                             self.colony.remove(self)
                         else:
