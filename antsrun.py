@@ -1,4 +1,4 @@
-import ants, time, pygame, random
+import ants, time, pygame, random, os, sys
 
 
 def setup():                #Setup all our lists and establish two ant colonies (RED vs BLU)
@@ -7,8 +7,8 @@ def setup():                #Setup all our lists and establish two ant colonies 
     trails = []
     foods = []
     text = []
-    colonies.append(ants.Colony([0,0,150],50, 150, 150, WIDTH, HEIGHT, 300))
-    colonies.append(ants.Colony([150,0,0],50, 650, 650, WIDTH, HEIGHT, 300))
+    colonies.append(ants.Colony([0,0,150], 1, 100, 150, 150, WIDTH, HEIGHT, 300))
+    colonies.append(ants.Colony([150,0,0], 1, 100, 650, 650, WIDTH, HEIGHT, 300))
     debug=0
     showtrail=0
 
@@ -74,9 +74,16 @@ def update():              #Update all our ants, trails, and foods.
 
 if __name__ == "__main__":
 
-
+    pygame.mixer.init()
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
     pygame.init()          #initialize pygame
     clock = pygame.time.Clock()     #start our FPS clock
+
+    PATH=str(os.path.abspath(os.path.dirname(sys.argv[0])))
+    
+    music=pygame.mixer.Sound(PATH+'/resources/gg.ogg')# music makes things better!
+    music.set_volume(.5)
+    music.play()
 
     #global constants here
     WIDTH=800

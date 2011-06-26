@@ -1,9 +1,11 @@
-import random, pygame
+import random, pygame, os, sys
 
 from math import *
 
+PATH=str(os.path.abspath(os.path.dirname(sys.argv[0])))
+
 class Colony(list):
-    def __init__(self,c, n, x, y, w, h, r):
+    def __init__(self,c, n, m, x, y, w, h, r):
         self.food = 10
         self.color=c
         self.step=0
@@ -17,8 +19,9 @@ class Colony(list):
         self.w = w      #Screen Width
         self.h = h      #Screen Height
         self.r = r      #Max wander radius
+        self.maxants = m    #Max ants
 
-        self.image = pygame.image.load("hill.png")
+        self.image = pygame.image.load(PATH+"/resources/hill.png")
         self.rect = self.image.get_rect()
         self.rect.center=(self.x,self.y)
     
@@ -49,7 +52,7 @@ class Pheromone:
         self.r = r        #Heading
         self.strength = 1.0     #Streangth of signal
     
-    def update(self, d=0.005):  #Degrade over time
+    def update(self, d=0.004):  #Degrade over time
         self.strength -= d
 
     def draw(self, surface):    #Draw using strength as color
@@ -73,8 +76,8 @@ class Ant:
         self.wandering = 0                      #How far have I wandered
         self.step = step                        #Do heavy lifting only so often
 
-        self.black = pygame.image.load("blackant.png")
-        self.red = pygame.image.load("redant.png")
+        self.black = pygame.image.load(PATH+"/resources/blackant.png")
+        self.red = pygame.image.load(PATH+"/resources/redant.png")
     
     def near(self, obj, radius=10):     #Distance function
 
@@ -142,7 +145,8 @@ class Ant:
                     self.has_food = False
                     self.r+=180
                     self.colony.food += 1
-                    self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
+                    if (len(self.colony) < self.colony.maxants):
+                        self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
 
     def fight(self, colonies):
         for colony in colonies:
@@ -154,12 +158,12 @@ class Ant:
                         else:
                             colony.remove(ant)
     
-    def update(self, trails, foodsource, colonies):
+    def update(self, trails, foods, colonies):
 
         if (self.step)==0:         
             self.follow(trails)     #follow nearby trails to food.
             
-        self.harvest(foodsource)    #harvest nearby food source
+        self.harvest(foods)    #harvest nearby food source
         
         if (self.step)==4:  
             self.recall(trails)     #bring food directly to colony
@@ -188,7 +192,7 @@ class Ant:
 class Text:
 
     def __init__(self, color, size, pos, text):
-        self.font = pygame.font.Font('freesansbold.ttf', size)
+        self.font = pygame.font.Font(PATH+"/resources/freesansbold.ttf", size)
         self.image = self.font.render(text, True, color)
         self.rect = self.image.get_rect()
         self.rect.topleft=pos
