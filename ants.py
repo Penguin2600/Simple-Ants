@@ -81,7 +81,7 @@ class Ant(pygame.sprite.Sprite):
             
         self.image=self.original
         self.rect=self.original.get_rect()
-        
+        self.rect.center=(-2000,-2000)
         self.sounds=audio.AntSamples()
         
     def near(self, obj, radius=10):     #Distance function
@@ -152,8 +152,8 @@ class Ant(pygame.sprite.Sprite):
                     self.r+=180
                     self.colony.food += 1
                     self.sounds.playsound('drop')
-                    #if (len(self.colony) < self.colony.maxants):
-                        #self.colony.append(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
+                    if (len(self.colony) < self.colony.maxants):
+                        self.colony.add(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
 
     def fight(self, colonies):
         for colony in colonies:
@@ -173,13 +173,13 @@ class Ant(pygame.sprite.Sprite):
             
         self.harvest(foods)    #harvest nearby food source
         
-        if (self.step)==4:  
+        if (self.step)==3:  
             self.recall(trails)     #bring food directly to colony
         
         self.wander()               #some random wandering is more efficient
 
-        #if (self.step)==5: 
-            #self.fight(colonies)        #FIGHT
+        if (self.step)==5: 
+            self.fight(colonies)        #FIGHT
 
         self.y += self.s*sin(radians(self.r))   #Move!
         self.x += self.s*cos(radians(self.r)) 
@@ -188,18 +188,10 @@ class Ant(pygame.sprite.Sprite):
         if (self.step > self.colony.maxstep): self.step=0
 
         # Handle pre-draw transforms
-
         self.image=pygame.transform.rotate(self.original, -self.r)
         self.image.set_colorkey([255,255,255])
         self.rect = self.image.get_rect()
         self.rect.center=(self.x,self.y)
-    
-##    def draw(self, surface):    #Draw our ant
-##        self.image=pygame.transform.rotate(self.original, -self.r)
-##        self.image.set_colorkey([255,255,255])
-##        self.rect = self.image.get_rect()
-##        self.rect.center=(self.x,self.y)
-##        surface.blit(self.image,self.rect.topleft)
 
         
 class Text:
