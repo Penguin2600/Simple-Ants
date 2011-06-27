@@ -31,7 +31,7 @@ class Colony(pygame.sprite.Group):
         if (self.step > self.maxstep): self.step=0
         return self.step
 
-    def drawhill(self, surface):    #Draw our "Hill"
+    def drawhill(self, surface):    #Draw our Hill
        surface.blit(self.image,self.rect.topleft)
 
 class Food:

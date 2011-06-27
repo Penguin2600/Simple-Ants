@@ -92,26 +92,37 @@ def update():              #Update all our ants, trails, and foods.
 def doview():
     global mousevars, ScrollX, ScrollY, HEIGHT, WIDTH, SHEIGHT, SWIDTH, Zoom
 
+    sdelta=20.0
+    zdelta=0.05
+    
     print mousevars
     if (mousevars[0] < WIDTH/10):
-        ScrollX+=10
+        ScrollX+=sdelta
             
     if (mousevars[0] > 9*(WIDTH/10)):
-        ScrollX-=10
+        ScrollX-=sdelta
 
     if (mousevars[1] < HEIGHT/10):
-        ScrollY+=10
+        ScrollY+=sdelta
 
     if (mousevars[1] > 9*(HEIGHT/10)):
-        ScrollY-=10
+        ScrollY-=sdelta
 
     if mousevars[5]:
-        Zoom+=0.05
-        if Zoom >1: Zoom=1
-        
+        Zoom+=zdelta
+        if Zoom >1:
+            Zoom=1
+        else:
+            ScrollX-= (zdelta/2)*SWIDTH
+            ScrollY-= (zdelta/2)*SHEIGHT   
     if mousevars[6]:
-        Zoom-=0.05
-        if Zoom <0.5: Zoom=0.5
+        Zoom-=zdelta
+        if Zoom < 0.5:
+            Zoom=0.5
+        else:
+            ScrollX+= (zdelta/2)*SWIDTH
+            ScrollY+= (zdelta/2)*SHEIGHT
+ 
 
     if ScrollX >0: ScrollX=0
     if ScrollX < WIDTH-SWIDTH*Zoom: ScrollX= WIDTH-SWIDTH*Zoom
@@ -128,8 +139,8 @@ if __name__ == "__main__":
 
     #global constants here
     pygame.display.set_caption('Simple Ants')
-    WIDTH=640
-    HEIGHT=480
+    WIDTH=800
+    HEIGHT=600
     SWIDTH=WIDTH*2
     SHEIGHT=HEIGHT*2
     Zoom=0.5
@@ -143,7 +154,7 @@ if __name__ == "__main__":
     sounds=audio.GameSamples()
     #sounds.playsound('music')
 
-    keys = {pygame.K_ESCAPE : False, pygame.K_d : False, pygame.K_t : False} #Declare keys we will use
+    keys = {pygame.K_ESCAPE : False, pygame.K_t : False} #Declare keys we will use
 
     setup()             #run our init function
 
