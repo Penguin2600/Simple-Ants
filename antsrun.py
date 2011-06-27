@@ -18,26 +18,23 @@ def doinput():                              #Handle input
         if event.type == pygame.QUIT:
             exit(0)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            
-            mouse=event.pos
             if event.button==4:
                 Zoom+=0.05
                 if Zoom >1: Zoom=1
             if event.button==5:
                 Zoom-=0.05
                 if Zoom <0.5: Zoom=0.5
-                
         elif event.type == pygame.MOUSEBUTTONUP:
             print event.button
         elif event.type == pygame.MOUSEMOTION:
-            print event.pos
+            mouse=event.pos
             if (event.pos[0] < WIDTH/10):
                 ScrollX+=10
                 if ScrollX >0: ScrollX=0
                 
             if (event.pos[0] > 9*(WIDTH/10)):
                 ScrollX-=10
-                if ScrollX+(SWIDTH*Zoom) < WIDTH: ScrollX= ScrollX+SWIDTH*Zoom
+                if ScrollX < WIDTH-SWIDTH*Zoom: ScrollX= WIDTH-SWIDTH*Zoom
                 
             if (event.pos[1] < HEIGHT/10):
                 ScrollY+=10
@@ -45,7 +42,7 @@ def doinput():                              #Handle input
                 
             if (event.pos[1] > 9*(HEIGHT/10)):
                 ScrollY-=10
-                if ScrollY < (SHEIGHT*Zoom)-HEIGHT: ScrollY= (SHEIGHT*Zoom)-HEIGHT
+                if ScrollY < HEIGHT-SHEIGHT*Zoom: ScrollY= HEIGHT-SHEIGHT*Zoom
                 
         elif event.type == pygame.KEYDOWN:
             keys[event.key] = True
