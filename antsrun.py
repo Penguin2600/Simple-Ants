@@ -1,7 +1,8 @@
 import ants, time, pygame, random, os, sys, audio
 
-def setup():                #Setup all our lists and establish two ant colonies (RED vs BLU)
-    global colonies, trails, foods, text, debug, showtrail, dirty
+def setup():                #Setup all our lists and establish two ant colonies
+    global colonies, trails, foods, text, showtrail, mousevars
+    mousevars = [0,0,0,0,0,0,0]
     colonies = []
     trails = []
     foods = []
@@ -12,38 +13,24 @@ def setup():                #Setup all our lists and establish two ant colonies 
     showtrail=False
 
 def doinput():                              #Handle input
-    global debug, showtrail, mouse, Zoom, ScrollX, ScrollY
-
+    global showtrail, mousevars
+    mousevars[5]=0
+    mousevars[6]=0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit(0)
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button==4:
-                Zoom+=0.05
-                if Zoom >1: Zoom=1
-            if event.button==5:
-                Zoom-=0.05
-                if Zoom <0.5: Zoom=0.5
         elif event.type == pygame.MOUSEBUTTONUP:
-            print event.button
+            if event.button < 4:
+                mousevars[event.button+1]=0
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mousevars[event.button+1]=1
+            if event.button==4:
+                mousevars[5]=1
+            if event.button==5:
+                mousevars[6]=1
         elif event.type == pygame.MOUSEMOTION:
-            mouse=event.pos
-            if (event.pos[0] < WIDTH/10):
-                ScrollX+=10
-                if ScrollX >0: ScrollX=0
-                
-            if (event.pos[0] > 9*(WIDTH/10)):
-                ScrollX-=10
-                if ScrollX < WIDTH-SWIDTH*Zoom: ScrollX= WIDTH-SWIDTH*Zoom
-                
-            if (event.pos[1] < HEIGHT/10):
-                ScrollY+=10
-                if ScrollY >0: ScrollY=0
-                
-            if (event.pos[1] > 9*(HEIGHT/10)):
-                ScrollY-=10
-                if ScrollY < HEIGHT-SHEIGHT*Zoom: ScrollY= HEIGHT-SHEIGHT*Zoom
-                
+            mousevars[0]=event.pos[0]
+            mousevars[1]=event.pos[1]  
         elif event.type == pygame.KEYDOWN:
             keys[event.key] = True
         elif event.type == pygame.KEYUP:
@@ -51,9 +38,6 @@ def doinput():                              #Handle input
             
         if keys[pygame.K_ESCAPE]:           # ESC = Quit
             exit(0)
-            
-        if keys[pygame.K_d]:                # d = Debug text
-            debug = not debug
 
         if keys[pygame.K_t]:                # t = Show Trails 
             showtrail = not showtrail
@@ -61,7 +45,7 @@ def doinput():                              #Handle input
 
 
 def update():              #Update all our ants, trails, and foods.
-    global colonies, trails, foods, text, debug, showtrail, dirty
+    global colonies, trails, foods, text, showtrail
     
     #GameSurface.fill([0,0,0])     #blank our background with a pleasant brown.
     SpriteSurface.fill([64,157,80])     #blank our background with a pleasant brown.
@@ -105,6 +89,38 @@ def update():              #Update all our ants, trails, and foods.
     pygame.display.update()  #draw our new frame
 
 
+def doview():
+    global mousevars, ScrollX, ScrollY, HEIGHT, WIDTH, SHEIGHT, SWIDTH, Zoom
+
+    print mousevars
+    if (mousevars[0] < WIDTH/10):
+        ScrollX+=10
+            
+    if (mousevars[0] > 9*(WIDTH/10)):
+        ScrollX-=10
+
+    if (mousevars[1] < HEIGHT/10):
+        ScrollY+=10
+
+    if (mousevars[1] > 9*(HEIGHT/10)):
+        ScrollY-=10
+
+    if mousevars[5]:
+        Zoom+=0.05
+        if Zoom >1: Zoom=1
+        
+    if mousevars[6]:
+        Zoom-=0.05
+        if Zoom <0.5: Zoom=0.5
+
+    if ScrollX >0: ScrollX=0
+    if ScrollX < WIDTH-SWIDTH*Zoom: ScrollX= WIDTH-SWIDTH*Zoom
+    if ScrollY >0: ScrollY=0
+    if ScrollY < HEIGHT-SHEIGHT*Zoom: ScrollY= HEIGHT-SHEIGHT*Zoom
+        
+    GameSurface.blit(pygame.transform.smoothscale(SpriteSurface, (int(SWIDTH*Zoom),int(SHEIGHT*Zoom))), (ScrollX,ScrollY))
+
+
 if __name__ == "__main__":
 
     pygame.init()          #initialize pygame
@@ -136,7 +152,6 @@ if __name__ == "__main__":
         #print clock.get_fps()
         doinput()           #Do input functions
         update()            #Do main update routene
-        GameSurface.blit(pygame.transform.smoothscale(SpriteSurface, (int(SWIDTH*Zoom),int(SHEIGHT*Zoom))), (ScrollX,ScrollY))
-        
+        doview()            #handle transforms to main view screen
         
     exit(0)
