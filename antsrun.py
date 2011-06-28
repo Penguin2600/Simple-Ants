@@ -7,8 +7,8 @@ def setup():                #Setup all our lists and establish two ant colonies
     trails = []
     foods = []
     text = []
-    colonies.append(ants.Colony("black", 3, random.random()*SWIDTH, random.random()*SHEIGHT, 150, SWIDTH, SHEIGHT, 900))
-    colonies.append(ants.Colony("red", 3, 100, random.random()*SWIDTH, random.random()*SHEIGHT, SWIDTH, SHEIGHT, 900))
+    colonies.append(ants.Colony("black", 10, 100, random.random()*SWIDTH, random.random()*SHEIGHT, SWIDTH, SHEIGHT, 900))
+    colonies.append(ants.Colony("red", 10, 100, random.random()*SWIDTH, random.random()*SHEIGHT, SWIDTH, SHEIGHT, 900))
     debug=False
     showtrail=False
 
@@ -62,7 +62,7 @@ def update():              #Update all our ants, trails, and foods.
 
     for f in foods:      #Update and draw our food blobs.
         f.draw(SpriteSurface)
-        if (f.size <2): foods.remove(f)
+        if (f.size <4): foods.remove(f)
 
     if (len(foods) < 1):    #Place new ones if the current ones are mined out.
         for i in range(2):
@@ -71,20 +71,12 @@ def update():              #Update all our ants, trails, and foods.
             s = (random.random()*20)+20
             foods.append(ants.Food(x,y,s))
 
-    text=[]          #text method only used for debug mode at this point.
-
 
     for colony in colonies:  #for each colony we need to go through and update and draw the ants.
         colony.drawhill(SpriteSurface)
         colony.draw(SpriteSurface)
-        text.append(ants.Text([150,150,150], 10, (colony.x-5, colony.y+30), str(len(colony))))
         colony.update(trails,foods,colonies)
         colony.draw(SpriteSurface)
-
-
-                                   
-    for t in text:        #draw any text we have.
-        t.draw(SpriteSurface)
 
     pygame.display.update()  #draw our new frame
 
@@ -95,7 +87,6 @@ def doview():
     sdelta=20.0
     zdelta=0.05
     
-    print mousevars
     if (mousevars[0] < WIDTH/10):
         ScrollX+=sdelta
             
@@ -110,7 +101,7 @@ def doview():
 
     if mousevars[5]:
         Zoom+=zdelta
-        if Zoom >1:
+        if Zoom >1 :
             Zoom=1
         else:
             ScrollX-= (zdelta/2)*SWIDTH
@@ -146,13 +137,16 @@ if __name__ == "__main__":
     Zoom=0.5
     ScrollX=0
     ScrollY=0
-    
-    pygame.transform.set_smoothscale_backend('SSE')
+
+    if (os.name == 'nt'):
+        pygame.transform.set_smoothscale_backend('SSE')
+    else:
+        pygame.transform.set_smoothscale_backend('GENERIC')
     
     GameSurface = pygame.display.set_mode([WIDTH, HEIGHT])
     SpriteSurface = pygame.Surface([SWIDTH,SHEIGHT])
     sounds=audio.GameSamples()
-    #sounds.playsound('music')
+    sounds.playsound('music')
 
     keys = {pygame.K_ESCAPE : False, pygame.K_t : False} #Declare keys we will use
 

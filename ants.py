@@ -51,7 +51,7 @@ class Pheromone:
         self.r = r        #Heading
         self.strength = 1.0     #Strength of signal
     
-    def update(self, d=0.004):  #Degrade over time
+    def update(self, d=0.002):  #Degrade over time
         self.strength -= d
 
     def draw(self, surface):    #Draw using strength as color
@@ -84,7 +84,7 @@ class Ant(pygame.sprite.Sprite):
         self.rect.center=(-2000,-2000)
         self.sounds=audio.AntSamples()
         
-    def near(self, obj, radius=10):     #Distance function
+    def near(self, obj, radius=20):     #Distance function
 
         d = (((obj.x-self.x)**2 ) + ((obj.y-self.y)**2))**0.5
 
@@ -127,7 +127,7 @@ class Ant(pygame.sprite.Sprite):
     def harvest(self, foodsource):
     
         for food in foodsource:  #Get food if we find it
-            if self.near(food, radius=food.size+2) and self.has_food == False: 
+            if self.near(food, radius=food.size+4) and self.has_food == False: 
                 food.size -= 1
                 self.has_food = True
                 self.sounds.playsound('get')
@@ -147,11 +147,11 @@ class Ant(pygame.sprite.Sprite):
                 if (placetrail):
                     trails.append(Pheromone(self.x, self.y, (self.r-180)))
         
-                if self.near(self.colony): #Drop food and start wandering again
+                if self.near(self.colony,20): #Drop food and start wandering again
                     self.has_food = False
-                    self.r+=180
                     self.colony.food += 1
                     self.sounds.playsound('drop')
+                    self.r+=180
                     if (len(self.colony) < self.colony.maxants):
                         self.colony.add(Ant(self.colony, self.colony.x, self.colony.y, self.colony.nstep()))
 
@@ -171,14 +171,15 @@ class Ant(pygame.sprite.Sprite):
         if (self.step)==0:         
             self.follow(trails)     #follow nearby trails to food.
             
-        self.harvest(foods)    #harvest nearby food source
+        if (self.step)==2:      
+            self.harvest(foods)    #harvest nearby food source
         
-        if (self.step)==3:  
+        if (self.step)==4:  
             self.recall(trails)     #bring food directly to colony
         
         self.wander()               #some random wandering is more efficient
 
-        if (self.step)==5: 
+        if (self.step)==6: 
             self.fight(colonies)        #FIGHT
 
         self.y += self.s*sin(radians(self.r))   #Move!
@@ -194,9 +195,10 @@ class Ant(pygame.sprite.Sprite):
         self.rect.center=(self.x,self.y)
 
         
-class Text:
+class Text(pygame.sprite.Sprite):
 
     def __init__(self, color, size, pos, text):
+        pygame.sprite.Sprite.__init__(self) 
         self.font = pygame.font.Font(PATH+"/resources/freesansbold.ttf", size)
         self.image = self.font.render(text, True, color)
         self.rect = self.image.get_rect()
