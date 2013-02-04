@@ -14,4 +14,4 @@ Requirements
 ------------
 
   * Python 2.7
-  * Pygame
+  * [Pygame](http://www.pygame.org)
