@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import ants, time, pygame, random, os, sys, audio
 
 def setup():                #Setup all our lists and establish two ant colonies
